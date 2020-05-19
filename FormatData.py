@@ -9,9 +9,9 @@ from PIL import Image
 DIR_PATH = './'
 
 class FormatData(data.Dataset):
-    def __init__(self, dataPath, split = 'train', imSize=(224,224), gridSize=(25, 25)):
+    def __init__(self, dataPath, type='train', imageSize=(224,224), gridSize=(25, 25)):
         self.dataPath = dataPath
-        self.imSize = imSize
+        self.imageSize = imageSize
         self.gridSize = gridSize
 
         metaFile = os.path.join(dataPath, 'metadata.mat')
@@ -26,26 +26,26 @@ class FormatData(data.Dataset):
         self.eyeRightMean = self.loadMATFile(os.path.join(DIR_PATH, 'mean_right_224.mat'))['image_mean']
         
         self.transformFace = transforms.Compose([
-            transforms.Resize(self.imSize),
+            transforms.Resize(self.imageSize),
             transforms.ToTensor(),
             SubtractMean(meanImg=self.faceMean),
         ])
 
         self.transformEyeL = transforms.Compose([
-            transforms.Resize(self.imSize),
+            transforms.Resize(self.imageSize),
             transforms.ToTensor(),
             SubtractMean(meanImg=self.eyeLeftMean),
         ])
 
         self.transformEyeR = transforms.Compose([
-            transforms.Resize(self.imSize),
+            transforms.Resize(self.imageSize),
             transforms.ToTensor(),
             SubtractMean(meanImg=self.eyeRightMean),
         ])
-
-        if split == 'test':
+        
+        if type == 'test':
             mask = self.metadata['labelTest']
-        elif split == 'val':
+        elif type == 'val':
             mask = self.metadata['labelVal']
         else:
             mask = self.metadata['labelTrain']
