@@ -9,10 +9,10 @@ fi
 
 # Constants
 DATA="/datadrive/gazecapture-dataset-prepared"
-MAIN="~/gazecapture/main.py"
+MAIN="/home/wtang06/gazecapture/gazecapture-cse455/main.py"
 DEFAULT_MODEL="models.ITrackerModelOriginal"
 
-OUTPUT_DIR="~/gazecapture/logs"
+OUTPUT_DIR="/home/wtang06/gazecapture/gazecapture-cse455/logs"
 OUTPUT_FILE="$MODEL-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c10).txt" # Generate a random file name prefixed with the model name
 
 SEARCH_PATTERN="from models\..* import ITrackerModel"
