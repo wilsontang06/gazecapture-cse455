@@ -37,6 +37,10 @@ Booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}
 
 '''
 
+# So we can kill runmodel.sh:
+print("Parent Process ID:", os.getppid())
+print("Process ID:", os.getpid())
+
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
         return True
