@@ -23,4 +23,5 @@ mkdir -p $OUTPUT_DIR && # Ensure the output directory exists
 git pull &&
 echo "Starting training and redirecting output/errors to $OUTPUT_DIR/$OUTPUT_FILE" &&
 sed -i "s/$SEARCH_PATTERN/$REPLACE_PATTERN/g" $MAIN && # Use the specified model
+conda activate gazecapture &&
 (sudo -E env "PATH=$PATH" nohup python $MAIN --data_path $DATA --reset > "$OUTPUT_DIR/$OUTPUT_FILE" 2>&1 &) # Runs the script in the background, redirecting stdout/stderr to the output file
