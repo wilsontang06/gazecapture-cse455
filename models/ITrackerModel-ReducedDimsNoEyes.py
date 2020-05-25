@@ -40,7 +40,6 @@ Booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}
 
 
 class ItrackerImageModel(nn.Module):
-    # Used for both eyes (with shared weights) and the face (with unqiue weights)
     def __init__(self):
         super(ItrackerImageModel, self).__init__()
         self.features = nn.Sequential(
@@ -87,12 +86,10 @@ class FaceGridModel(nn.Module):
         return x
 
 
-
 class ITrackerModel(nn.Module):
-
+    
     def __init__(self):
         super(ITrackerModel, self).__init__()
-        self.eyeModel = ItrackerImageModel()
         self.faceModel = FaceImageModel()
         self.gridModel = FaceGridModel()
         # Joining both eyes
@@ -102,18 +99,15 @@ class ITrackerModel(nn.Module):
         )
         # Joining everything
         self.fc = nn.Sequential(
-            nn.Linear(64+64+128, 2),
+            nn.Linear(64+128, 2),
             nn.ReLU(inplace=True)
         )
 
     def forward(self, faces, eyesLeft, eyesRight, faceGrids):
-        # Eye nets
-        xEyeL = self.eyeModel(eyesLeft) # batch size X 9216
-        xEyeR = self.eyeModel(eyesRight) # batch size X 9216
-
-        # Cat and FC
-        xEyes = torch.cat((xEyeL, xEyeR), 1)
-        xEyes = self.eyesFC(xEyes) # batch size X 128
+        # No eyes, filled with 0s
+        batch_size = eyesLeft.size()[0]
+        eye_dimension = 0
+        xEyes = torch.zeros((batch_size, eye_dimension)).cuda()
 
         # Face net
         xFace = self.faceModel(faces)
