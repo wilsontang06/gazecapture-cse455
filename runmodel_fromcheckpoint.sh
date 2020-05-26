@@ -1,9 +1,10 @@
 # Check for arguments
 MODEL=$1
+CHECKPOINT_TAR=$2
 
-if [ -z "$MODEL" ]
+if [ -z "$MODEL" ] || [ -z "$CHECKPOINT_TAR" ]
 then
-  echo "EXAMPLE USAGE: ./runmodel.sh models.MyCustomModel"
+  echo "EXAMPLE USAGE: ./runmodel_fromcheckpoint.sh models.MyCustomModel models.MyCustomModel-8ShATTSPoF.pth.tar"
   exit 1
 fi
 
@@ -19,17 +20,14 @@ MODEL_SEARCH_PATTERN="from models\..* import ITrackerModel"
 MODEL_REPLACE_PATTERN="from $MODEL import ITrackerModel"
 
 CHECKPOINT_SEARCH_PATTERN="filename='.*'"
-CHECKPOINT_REPLACE_PATTERN="filename='$IDENTIFIER.pth.tar'"
-CHECKPOINTS_PATH="/home/wtang06/gazecapture/gazecapture-cse455/checkpoints" # This should be the same as CHECKPOINTS_PATH in main.py
+CHECKPOINT_REPLACE_PATTERN="filename='$CHECKPOINT_TAR'"
 
 # Start training
-mkdir -p $OUTPUT_DIR && # Ensure the log output directory exists
-mkdir -p $CHECKPOINTS_PATH && # Ensure the checkpoint output directory exists
+mkdir -p $OUTPUT_DIR && # Ensure the output directory exists
 git pull &&
-echo "Starting training and redirecting output/errors to $OUTPUT_DIR/$OUTPUT_FILE" &&
-echo "...the checkpoint will be saved in $CHECKPOINTS_PATH/$IDENTIFIER.pth.tar" &&
+echo "Starting training from $CHECKPOINT_TAR and redirecting output/errors to $OUTPUT_DIR/$OUTPUT_FILE" &&
 sed -i "s/$MODEL_SEARCH_PATTERN/$MODEL_REPLACE_PATTERN/g" $MAIN && # Use the specified model
 sed -i "s/$CHECKPOINT_SEARCH_PATTERN/$CHECKPOINT_REPLACE_PATTERN/g" $MAIN && # Unique checkpoint names
 source ~/anaconda3/etc/profile.d/conda.sh &&
 conda activate gazecapture &&
-(sudo -E env "PATH=$PATH" nohup python $MAIN --data_path $DATA --reset > "$OUTPUT_DIR/$OUTPUT_FILE" 2>&1 &) # Runs the script in the background, redirecting stdout/stderr to the output file
+(sudo -E env "PATH=$PATH" nohup python $MAIN --data_path $DATA > "$OUTPUT_DIR/$OUTPUT_FILE" 2>&1 &) # Runs the script in the background, redirecting stdout/stderr to the output file

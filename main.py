@@ -257,7 +257,7 @@ def validate(val_loader, model, criterion, epoch):
 
     return lossesLin.avg
 
-CHECKPOINTS_PATH = '.'
+CHECKPOINTS_PATH = '/home/wtang06/gazecapture/gazecapture-cse455/checkpoints'
 
 def load_checkpoint(filename='checkpoint.pth.tar'):
     filename = os.path.join(CHECKPOINTS_PATH, filename)
