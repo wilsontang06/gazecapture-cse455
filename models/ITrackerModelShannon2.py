@@ -75,9 +75,7 @@ class FaceImageModel(nn.Module):
         super(FaceImageModel, self).__init__()
         self.conv = ItrackerImageModel()
         self.fc = nn.Sequential(
-            nn.Linear(12*12*64, 128),
-            nn.ReLU(inplace=True),
-            nn.Linear(128, 64),
+            nn.Linear(12*12*64, 64),
             nn.ReLU(inplace=True),
             )
 
