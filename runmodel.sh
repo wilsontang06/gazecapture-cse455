@@ -25,6 +25,7 @@ CHECKPOINTS_PATH="/home/wtang06/gazecapture/gazecapture-cse455/checkpoints" # Th
 # Start training
 mkdir -p $OUTPUT_DIR && # Ensure the log output directory exists
 mkdir -p $CHECKPOINTS_PATH && # Ensure the checkpoint output directory exists
+git checkout $MAIN && # Go back to the main.py before any of our replacements
 git pull &&
 echo "Starting training and redirecting output/errors to $OUTPUT_DIR/$OUTPUT_FILE" &&
 echo "...the checkpoint will be saved in $CHECKPOINTS_PATH/$IDENTIFIER.pth.tar" &&
