@@ -1,17 +1,30 @@
 "use strict";
 (function() {
 
+  let imageCapture;
+
   window.addEventListener("load", init);
 
   function init() {
     turnCamOn();
-    $("getPosButton").addEventListener("click", processImage);
+    $("captureButton").addEventListener("click", processImage);
     $("camButton").addEventListener("click", toggleCamera);
   }
 
   function processImage() {
-    alert("say cheese!");
-    // insert fetch call to backend
+    // can put this in a loop or timer to constantly send capture images
+    // for now, hopefully get one photo working
+
+    imageCapture.takePhoto()
+      .then(blob => {
+        let url = window.URL.createObjectURL(blob);
+        alert(url); // replace with sending the image
+        // insert fetch call to backend
+        //    for scrolling, use this button as a "start recording"
+        //    so it can toggle the calls to the backend
+
+        window.URL.revokeObjectURL(url);
+      })
   }
 
   function toggleCamera() {
@@ -32,8 +45,12 @@
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(function (stream) {
           video.srcObject = stream;
-          localStream = stream;
+          let mediaStreamTrack = stream.getVideoTracks()[0];
+          imageCapture = new ImageCapture(mediaStreamTrack);
           video.play();
+        })
+        .catch(function (e) {
+          alert("Something went wrong!");
         });
     }
   }
