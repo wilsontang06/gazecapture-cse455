@@ -1,0 +1,33 @@
+body {
+    max-width: 500px;
+    margin: auto;
+    text-align: center;
+}
+
+#description {
+  text-align: left;
+}
+
+#webcam {
+    width: 500px;
+    height: 375px;
+    background-color: #767c87;
+    border: 10px #333 solid;
+}
+
+button {
+    margin: 25px;
+    padding: 12px 28px;
+    font-size: 16px;
+    background-color: #f44336;
+    border-radius: 8px;
+    border: 2px solid black;
+}
+
+#captureButton {
+    background-color: #14db35;
+}
+
+.camButtonOn {
+    background-color: #2cb7e6;
+}

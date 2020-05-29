@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSE 455 Project</title>
+    <link rel="icon" href="cam.png">
+    <link href="index.css" rel="stylesheet">
+    <script src="camera.js"></script>
+</head>
+<body>
+    <h1>CSE 455 Gazecapture Project</h1>
+    <video autoplay="true" id="webcam"></video>
+    <button id="captureButton">Capture Picture</button>
+    <button id="camButton">Turn Webcam Off</button>
+    <div id="description">
+        <p>This website sends a user provided image from their webcam and is run
+            through our eye tracking model. Once the model completes, a coordinate is
+            given back by the model which predicts where the user is looking at on the browser.
+            Credit is given to MIT's research paper for the motivation of this project:
+            <a href="https://people.csail.mit.edu/khosla/papers/cvpr2016_Khosla.pdf" target="_blank">
+                https://people.csail.mit.edu/khosla/papers/cvpr2016_Khosla.pdf</a></p>
+    </div>
+</body>
+</html>
