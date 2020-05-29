@@ -47,6 +47,8 @@ class ItrackerImageModel(nn.Module):
             nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=0),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
+            nn.Conv2d(96, 64, kernel_size=1, stride=1, padding=0),
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x):
@@ -60,7 +62,7 @@ class FaceImageModel(nn.Module):
         super(FaceImageModel, self).__init__()
         self.conv = ItrackerImageModel()
         self.fc = nn.Sequential(
-            nn.Linear(12*12*64, 128),
+            nn.Linear(43264, 128),
             nn.ReLU(inplace=True),
             )
 
