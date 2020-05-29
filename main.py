@@ -163,11 +163,11 @@ def train(train_loader, model, criterion,optimizer, epoch):
 
         # measure data loading time
         data_time.update(time.time() - end)
-        imFace = imFace.cuda()
-        imEyeL = imEyeL.cuda()
-        imEyeR = imEyeR.cuda()
-        faceGrid = faceGrid.cuda()
-        gaze = gaze.cuda()
+        imFace = imFace.cuda(non_blocking=True)
+        imEyeL = imEyeL.cuda(non_blocking=True)
+        imEyeR = imEyeR.cuda(non_blocking=True)
+        faceGrid = faceGrid.cuda(non_blocking=True)
+        gaze = gaze.cuda(non_blocking=True)
 
         imFace = torch.autograd.Variable(imFace, requires_grad = True)
         imEyeL = torch.autograd.Variable(imEyeL, requires_grad = True)
@@ -216,11 +216,11 @@ def validate(val_loader, model, criterion, epoch):
     for i, (row, imFace, imEyeL, imEyeR, faceGrid, gaze) in enumerate(val_loader):
         # measure data loading time
         data_time.update(time.time() - end)
-        imFace = imFace.cuda()
-        imEyeL = imEyeL.cuda()
-        imEyeR = imEyeR.cuda()
-        faceGrid = faceGrid.cuda()
-        gaze = gaze.cuda()
+        imFace = imFace.cuda(non_blocking=True)
+        imEyeL = imEyeL.cuda(non_blocking=True)
+        imEyeR = imEyeR.cuda(non_blocking=True)
+        faceGrid = faceGrid.cuda(non_blocking=True)
+        gaze = gaze.cuda(non_blocking=True)
 
         imFace = torch.autograd.Variable(imFace, requires_grad = False)
         imEyeL = torch.autograd.Variable(imEyeL, requires_grad = False)
