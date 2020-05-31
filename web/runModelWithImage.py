@@ -14,6 +14,8 @@ IMAGE_FILE = "sample.jpg"
 @app.route('/model', methods=['POST'])
 def run_model():
     image = request.form["image"]
+
+    # save image into temp file for model to read
     urllib.request.urlretrieve(image, IMAGE_FILE)
 
     # run model with file
@@ -22,7 +24,7 @@ def run_model():
     # save coordinates (will likely need to change to properly extract the output from the model)
     coords = output.stdout
 
-    # delete file
+    # delete temp file
     os.remove(IMAGE_FILE)
 
     # (can change if want to send just y coord and also output as text or json)

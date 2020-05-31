@@ -76,7 +76,9 @@
   }
 
   function processCoordinates(response) {
-    $("dummy").src = response;
+    // TODO: change to display coords, also implementing scroll feature
+    // Scrolling ideas: define top and bottom y coordinate for where scrolling should start
+    // need to proportion based on screen size
   }
 
   function checkStatus(response) {
