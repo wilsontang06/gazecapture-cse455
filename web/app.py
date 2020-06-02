@@ -46,6 +46,8 @@ def run_model():
   # TODO: to account for multiple images coming
   # need to loop around whole code for calling azure
   # need to call face api for each image, jsons will be top of loop
+  # CHOOSE: send one image to model at a time, or multiple (groups of 5 or 10)
+  #         Depends on how long the model takes
   face = detected_faces[0]
 
   # Save face dimensions in face rectangle and face landmarks
@@ -76,30 +78,35 @@ def run_model():
 
 
   # run prepareDataset to generate cropped images
-
+  #output = subprocess.run(["python3", "../prepareDataset.py",
+  #                         "--dataset_path", IMAGE_DATA_PATH,
+  #                         "--output_path", DATASET_PATH])
 
 
   # run model with file
-  #output = subprocess.run(["python3", "../main.py", "--data_path", DATASET_PATH, "--sink"], capture_output=True)
+  #output = subprocess.run(["python3", "../main.py",
+  #                         "--data_path", DATASET_PATH, "--sink"], capture_output=True)
 
   # save coordinates (will likely need to change to properly extract the output from the model)
   #coords = output.stdout
+
+  # debug (delete after)
   coords = json.dumps(appleFace) + "\n\n" + json.dumps(appleLeftEye) + "\n\n" + json.dumps(appleRightEye)
 
   # delete temp file
   os.remove(tempImagePath)
 
-  ## (can change if want to send just y coord)
+  ## (can change if want to send both (x,y) or just y coord)
   return coords
 
-def addFaceValues(json, face, isFace, isLeft):
+def addFaceValues(json, face, isFace, isLeftEye):
   face_rect = face.face_rectangle
   if isFace:
     x, y, w, h = face_rect.left, face_rect.top, \
                  face_rect.width, face_rect.height
   else:
     face_details = face.face_landmarks
-    if isLeft:
+    if isLeftEye:
       o, i, t, b = face_details.eye_left_outer, face_details.eye_left_inner, \
                    face_details.eye_left_top, face_details.eye_left_bottom
     else:
@@ -116,9 +123,9 @@ def computeEyeData(outer, inner, top, bottom, faceX, faceY):
   minLeft = min(outer.x, min(inner.x, top.x))
   minTop = min(outer.y, min(inner.y, top.y))
   maxTop = max(outer.y, max(inner.y, top.y))
-  h = abs(maxTop - minTop) * 2
+  h = abs(maxTop - minTop) * 2 # likely need to make the eye crop a square
   w = abs(inner.x - outer.x) * 2
-  x = minLeft - faceX -  w / 2
-  y = minTop - faceY - h / 2
+  x = minLeft - faceX -  w / 4 # play with this divide
+  y = minTop - faceY - h / 4
 
   return x, y, w, h

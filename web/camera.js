@@ -1,22 +1,30 @@
 "use strict";
 (function() {
 
-  const ENDPOINT = "https://westcentralus.api.cognitive.microsoft.com/face/v1.0/detect"
-  const KEY = 'b43ef5bfb2a04b15a668f0f7e66cb896'
-
-
   const WIDTH = 500;
   const HEIGHT = 375;
+  const HOST = "http://127.0.0.1:5000/model"
 
-
-  let imageCapture;
+  let timer;
 
   window.addEventListener("load", init);
 
   function init() {
+    let canvas = document.createElement('canvas');
+    canvas.width  = WIDTH;
+    canvas.height = HEIGHT;
+    let ctx = canvas.getContext("2d");
+
     turnCamOn();
-    $("captureButton").addEventListener("click", processImage);
+    // TODO: fill site with junk or random photos (so we can scroll the page)
+    // TODO: also add instructions/descriptions for the buttons
     $("camButton").addEventListener("click", toggleCamera);
+    $("captureButton").addEventListener("click", function() {
+      processImage(canvas, ctx);
+    });
+    $("scrollButton").addEventListener("click", function() {
+      processStreamOfImages(canvas, ctx);
+    });
   }
 
   function toggleCamera() {
@@ -24,10 +32,12 @@
       turnCamOn();
       $("captureButton").disabled = false;
       $("camButton").innerText = "Turn Webcam Off";
+      $("scrollButton").disabled = false;
     } else {
       $("webcam").srcObject.getTracks()[0].stop();
       $("captureButton").disabled = true;
       $("camButton").innerText = "Turn Webcam On";
+      $("scrollButton").disabled = true;
     }
     $("camButton").classList.toggle("camButtonOn");
   }
@@ -40,7 +50,6 @@
         .then(function (stream) {
           video.srcObject = stream;
           let mediaStreamTrack = stream.getVideoTracks()[0];
-          imageCapture = new ImageCapture(mediaStreamTrack);
           video.play();
         })
         .catch(function (e) {
@@ -49,47 +58,43 @@
     }
   }
 
-  function processImage() {
-    // can put this in a loop or timer to constantly send capture images
-    // while (the classlist contains capture is on)
-    // for now, hopefully get one photo working
+  function processImage(canvas, ctx) {
+    // capture the current image from the webcam
+    let img = document.getElementById("webcam");
+    ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+    let jpegFile = canvas.toDataURL("image/jpeg");
 
-    imageCapture.takePhoto()
-      .then(blob => {
-        // replace with sending the image
-        // insert fetch call to backend
-        //    for scrolling, use this button as a "start recording"
-        //    so it can toggle the calls to the backend
+    let params = new FormData();
+    params.append("image", jpegFile);
 
-        let canvas = document.createElement('canvas');
-        canvas.width  = WIDTH;
-        canvas.height = HEIGHT;
-        let ctx = canvas.getContext("2d");
-        let img = document.getElementById("webcam");
-        ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
-
-        let jpegFile = canvas.toDataURL("image/jpeg");
-
-        let params = new FormData();
-        params.append("image", jpegFile);
-
-        fetch("http://127.0.0.1:5000/model", {method: "POST", body: params})
-          .then(checkStatus)
-          .then(resp => resp.text())
-          .then(processCoordinates)
-          .catch(console.log);
-      })
-  }
-
-  function retrieveData(response) {
-    alert(response);
+    // sends the image to the backend to be evaluated with the model
+    fetch(HOST, {method: "POST", body: params})
+      .then(checkStatus)
+      .then(resp => resp.text())
+      .then(processCoordinates)
+      .catch(console.log);
   }
 
   function processCoordinates(response) {
-    // TODO: change to display coords, also implementing scroll feature
-    // Scrolling ideas: define top and bottom y coordinate for where scrolling should start
-    // need to proportion based on screen size
+    // TODO: change to display coords (dot on screen at the position)
     $("debug").innerText = response
+  }
+
+  function processStreamOfImages(canvas, ctx) {
+    let scrollBtn = $("scrollButton");
+    if (timer != null) {
+      clearInterval(timer);
+      timer = null;
+      scrollBtn.innerText = "Click to Scroll";
+    } else {
+      scrollBtn.innerText = "Stop Scrolling";
+      timer = setInterval(function() {
+          processImage(canvas, ctx);
+          // TODO: also implementing scroll feature
+          // Scrolling ideas: define top and bottom y coordinate for where scrolling should start
+          // need to proportion based on screen size
+      }, 1000);
+    }
   }
 
   function checkStatus(response) {

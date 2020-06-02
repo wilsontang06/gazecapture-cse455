@@ -16,7 +16,7 @@ body {
 }
 
 button {
-    margin: 25px;
+    margin: 5px 25px;
     padding: 12px 28px;
     font-size: 16px;
     background-color: #f44336;
@@ -26,6 +26,10 @@ button {
 
 #captureButton {
     background-color: #14db35;
+}
+
+#scrollButton {
+    background-color: #32faf3;
 }
 
 .camButtonOn {
