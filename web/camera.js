@@ -1,8 +1,13 @@
 "use strict";
 (function() {
 
+  const ENDPOINT = "https://westcentralus.api.cognitive.microsoft.com/face/v1.0/detect"
+  const KEY = 'b43ef5bfb2a04b15a668f0f7e66cb896'
+
+
   const WIDTH = 500;
   const HEIGHT = 375;
+
 
   let imageCapture;
 
@@ -17,9 +22,11 @@
   function toggleCamera() {
     if ($("camButton").classList.contains("camButtonOn")) {
       turnCamOn();
+      $("captureButton").disabled = false;
       $("camButton").innerText = "Turn Webcam Off";
     } else {
       $("webcam").srcObject.getTracks()[0].stop();
+      $("captureButton").disabled = true;
       $("camButton").innerText = "Turn Webcam On";
     }
     $("camButton").classList.toggle("camButtonOn");
@@ -49,7 +56,6 @@
 
     imageCapture.takePhoto()
       .then(blob => {
-        //let url = window.URL.createObjectURL(blob);
         // replace with sending the image
         // insert fetch call to backend
         //    for scrolling, use this button as a "start recording"
@@ -75,10 +81,15 @@
       })
   }
 
+  function retrieveData(response) {
+    alert(response);
+  }
+
   function processCoordinates(response) {
     // TODO: change to display coords, also implementing scroll feature
     // Scrolling ideas: define top and bottom y coordinate for where scrolling should start
     // need to proportion based on screen size
+    $("debug").innerText = response
   }
 
   function checkStatus(response) {
