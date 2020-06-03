@@ -21,7 +21,6 @@ SUBJECT_DATA_PATH = DATASET_PATH + "/00000"
 IMAGE_FILE = "00000.jpg"
 
 app = Flask(__name__)
-app.run(host='0.0.0.0')
 CORS(app)
 
 @app.route('/model', methods=['POST'])
@@ -181,3 +180,4 @@ def faceGridFromFaceRect(frameW, frameH, gridW, gridH, labelFaceX, labelFaceY, l
     labelFaceGrid[i][3] = np.round(labelFaceH[i] * scaleY)
 
   return labelFaceGrid.astype(int).tolist()
+
