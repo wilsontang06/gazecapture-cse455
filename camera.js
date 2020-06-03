@@ -3,7 +3,7 @@
 
   const WIDTH = 500;
   const HEIGHT = 375;
-  const HOST = "http://127.0.0.1:5000/model"
+  const HOST = "http://gazecapture455.westus2.cloudapp.azure.com:5000/model"
 
   let timer;
 
