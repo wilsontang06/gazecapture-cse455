@@ -118,7 +118,7 @@ def run_model():
 
   # save coordinates (will likely need to change to properly extract the output from the model)
   #coords = output.stdout
-  # print("output", out, err)
+  print("output", out, err)
 
   # debug (delete after)
   coords = json.dumps(appleFace) + "\n\n" + json.dumps(appleLeftEye) + "\n\n" + json.dumps(appleRightEye)

@@ -57,7 +57,7 @@ parser.add_argument('--prod', type=str2bool, nargs='?', const=True, default=Fals
 args = parser.parse_args()
 
 # Change there flags to control what happens.
-3 = not args.reset # Load checkpoint at the beginning
+doLoad = not args.reset # Load checkpoint at the beginning
 doTest = args.sink # Only run test, no training
 prod = args.prod # Don't compute any loss. Used for running in production.
 

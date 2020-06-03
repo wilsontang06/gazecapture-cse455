@@ -1,1 +1,4 @@
 *.pyc
+*.jpg
+data/**/*.json
+data_processed/**/*.json
