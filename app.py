@@ -8,13 +8,17 @@ import json
 import urllib.request
 import os
 import subprocess
+import numpy as np
+from .prepareInput import prepareInput
+from shutil import copytree, rmtree
 
 KEY = 'd09e05217d2e40b98e07f105b90de804'
 ENDPOINT = 'https://westcentralus.api.cognitive.microsoft.com/'
 
-DATASET_PATH = "[prepared dataset path]"
-IMAGE_DATA_PATH = "data"
-IMAGE_FILE = "sample.jpg"
+DATASET_PATH = "data"
+DATASET_OUTPUT_PATH = "data_processed"
+SUBJECT_DATA_PATH = DATASET_PATH + "/00000"
+IMAGE_FILE = "00000.jpg"
 
 app = Flask(__name__)
 CORS(app)
@@ -24,7 +28,7 @@ def run_model():
   imageData = request.form["image"]
 
   # save image into temp file to pass stream to face api
-  tempImagePath = os.path.join(IMAGE_DATA_PATH, IMAGE_FILE)
+  tempImagePath = os.path.join(SUBJECT_DATA_PATH + "/frames", IMAGE_FILE)
   urllib.request.urlretrieve(imageData, tempImagePath)
   image = open(tempImagePath, 'rb')
 
@@ -60,35 +64,61 @@ def run_model():
   addFaceValues(appleRightEye, face, False, False)
 
   # Save into json files for prepareDataset to crop image
-  facePath = os.path.join(IMAGE_DATA_PATH, 'appleFace.json')
+  facePath = os.path.join(SUBJECT_DATA_PATH, 'appleFace.json')
   with open(facePath, 'w') as outfile:
     json.dump(appleFace, outfile)
 
-  leftEyePath = os.path.join(IMAGE_DATA_PATH, 'appleLeftEye.json')
+  leftEyePath = os.path.join(SUBJECT_DATA_PATH, 'appleLeftEye.json')
   with open(leftEyePath, 'w') as outfile:
     json.dump(appleLeftEye, outfile)
 
-  rightEyePath = os.path.join(IMAGE_DATA_PATH, 'appleRightEye.json')
+  rightEyePath = os.path.join(SUBJECT_DATA_PATH, 'appleRightEye.json')
   with open(rightEyePath, 'w') as outfile:
     json.dump(appleRightEye, outfile)
 
 
   # run facegrid matlab script to get facegrid json
+  frameW, frameH = Image.open(tempImagePath).size
+  gridW = 25
+  gridH = 25
+  labelFaceGrid = faceGridFromFaceRect(
+    frameW, frameH, gridW, gridH,
+    appleFace['X'], appleFace['Y'], appleFace['W'], appleFace['H']
+  )
 
+  faceGrid = {
+    'H': [labelFaceGrid[0][3]],
+    'W': [labelFaceGrid[0][2]],
+    'X': [labelFaceGrid[0][0]],
+    'Y': [labelFaceGrid[0][1]],
+    'IsValid': [1]
+  }
+  faceGridPath = os.path.join(SUBJECT_DATA_PATH, 'faceGrid.json')
+  with open(faceGridPath, 'w') as outfile:
+    json.dump(faceGrid, outfile)
 
+  # generate frames.json
+  frames = [IMAGE_FILE]
+  framesPath = os.path.join(SUBJECT_DATA_PATH, 'frames.json')
+  with open(framesPath, 'w') as outfile:
+    json.dump(frames, outfile)
+
+  # theres a bug where numpy can turn a 1x1 array into a single number, so i just copy this subject and pretend there are 2
+  if os.path.exists(DATASET_PATH + "/00001"):
+    rmtree(DATASET_PATH + "/00001")
+  copytree(DATASET_PATH + "/00000", DATASET_PATH + "/00001")
 
   # run prepareDataset to generate cropped images
-  #output = subprocess.run(["python3", "../prepareDataset.py",
-  #                         "--dataset_path", IMAGE_DATA_PATH,
-  #                         "--output_path", DATASET_PATH])
-
+  prepareInput(DATASET_PATH, DATASET_OUTPUT_PATH)
 
   # run model with file
-  #output = subprocess.run(["python3", "../main.py",
-  #                         "--data_path", DATASET_PATH, "--sink"], capture_output=True)
+  process = subprocess.Popen(["python3", "main.py",
+                          "--data_path", DATASET_OUTPUT_PATH, "--sink", "--prod"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  out, err = process.communicate()
 
   # save coordinates (will likely need to change to properly extract the output from the model)
   #coords = output.stdout
+  # print("output", out, err)
 
   # debug (delete after)
   coords = json.dumps(appleFace) + "\n\n" + json.dumps(appleLeftEye) + "\n\n" + json.dumps(appleRightEye)
@@ -129,3 +159,23 @@ def computeEyeData(outer, inner, top, bottom, faceX, faceY):
   y = minTop - faceY - h / 4
 
   return x, y, w, h
+
+# (parameterized = 1) translation of faceGridFromFaceRect.m into Python
+# outputs a (numSamples X 4) numpy array A, where A[i] is the [X, Y, W, H] of the ith index in faceGrid
+# TODO: might need parameterized version
+def faceGridFromFaceRect(frameW, frameH, gridW, gridH, labelFaceX, labelFaceY, labelFaceW, labelFaceH):
+  scaleX = gridW / frameW
+  scaleY = gridH / frameH
+  numSamples = len(labelFaceX)
+  labelFaceGrid = np.zeros((numSamples, 4))
+
+  for i in range(numSamples):
+    grid = np.zeros((gridH, gridW))
+
+    # Use one-based image coordinates.
+    labelFaceGrid[i][0] = np.round(labelFaceX[i] * scaleX) + 1
+    labelFaceGrid[i][1] = np.round(labelFaceY[i] * scaleY) + 1
+    labelFaceGrid[i][2] = np.round(labelFaceW[i] * scaleX)
+    labelFaceGrid[i][3] = np.round(labelFaceH[i] * scaleY)
+
+  return labelFaceGrid.astype(int).tolist()

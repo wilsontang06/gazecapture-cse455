@@ -53,11 +53,13 @@ parser = argparse.ArgumentParser(description='iTracker-pytorch-Trainer.')
 parser.add_argument('--data_path', help="Path to processed dataset. It should contain metadata.mat. Use prepareDataset.py.")
 parser.add_argument('--sink', type=str2bool, nargs='?', const=True, default=False, help="Just sink and terminate.")
 parser.add_argument('--reset', type=str2bool, nargs='?', const=True, default=False, help="Start from scratch (do not load).")
+parser.add_argument('--prod', type=str2bool, nargs='?', const=True, default=False, help="Don't compute any loss. Used for running in production.")
 args = parser.parse_args()
 
 # Change there flags to control what happens.
-doLoad = not args.reset # Load checkpoint at the beginning
+3 = not args.reset # Load checkpoint at the beginning
 doTest = args.sink # Only run test, no training
+prod = args.prod # Don't compute any loss. Used for running in production.
 
 workers = 16
 epochs = 25
@@ -82,6 +84,7 @@ def main():
     model = ITrackerModel()
     model = torch.nn.DataParallel(model)
     model.cuda()
+
     imSize=(224,224)
     cudnn.benchmark = True
 
@@ -100,15 +103,16 @@ def main():
         else:
             print('Warning: Could not read checkpoint!')
 
+    # dont load training data in prod
+    train_loader = None
+    if not prod:
+        dataTrain = ITrackerData(dataPath = args.data_path, split='train', imSize = imSize)
+        train_loader = torch.utils.data.DataLoader(
+            dataTrain,
+            batch_size=batch_size, shuffle=True,
+            num_workers=workers, pin_memory=True)
 
-    dataTrain = ITrackerData(dataPath = args.data_path, split='train', imSize = imSize)
     dataVal = ITrackerData(dataPath = args.data_path, split='test', imSize = imSize)
-
-    train_loader = torch.utils.data.DataLoader(
-        dataTrain,
-        batch_size=batch_size, shuffle=True,
-        num_workers=workers, pin_memory=True)
-
     val_loader = torch.utils.data.DataLoader(
         dataVal,
         batch_size=batch_size, shuffle=False,
@@ -226,21 +230,24 @@ def validate(val_loader, model, criterion, epoch):
         imEyeL = torch.autograd.Variable(imEyeL, requires_grad = False)
         imEyeR = torch.autograd.Variable(imEyeR, requires_grad = False)
         faceGrid = torch.autograd.Variable(faceGrid, requires_grad = False)
+
         gaze = torch.autograd.Variable(gaze, requires_grad = False)
 
         # compute output
         with torch.no_grad():
             output = model(imFace, imEyeL, imEyeR, faceGrid)
 
-        loss = criterion(output, gaze)
+        loss = None
+        if not prod:
+            loss = criterion(output, gaze)
 
-        lossLin = output - gaze
-        lossLin = torch.mul(lossLin,lossLin)
-        lossLin = torch.sum(lossLin,1)
-        lossLin = torch.mean(torch.sqrt(lossLin))
+            lossLin = output - gaze
+            lossLin = torch.mul(lossLin,lossLin)
+            lossLin = torch.sum(lossLin,1)
+            lossLin = torch.mean(torch.sqrt(lossLin))
 
-        losses.update(loss.data.item(), imFace.size(0))
-        lossesLin.update(lossLin.item(), imFace.size(0))
+            losses.update(loss.data.item(), imFace.size(0))
+            lossesLin.update(lossLin.item(), imFace.size(0))
 
         # compute gradient and do SGD step
         # measure elapsed time
