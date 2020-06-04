@@ -172,8 +172,9 @@ def computeEyeData(outer, inner, top, bottom, faceX, faceY):
   minLeft = min(outer.x, min(inner.x, top.x))
   minTop = min(outer.y, min(inner.y, top.y))
   maxTop = max(outer.y, max(inner.y, top.y))
-  h = abs(maxTop - minTop) * 2 # likely need to make the eye crop a square
-  w = abs(inner.x - outer.x) * 2
+  w = abs(inner.x - outer.x) * 3
+  #h = abs(maxTop - minTop) * 2 # likely need to make the eye crop a square
+  h = w
   x = minLeft - faceX -  w / 4 # play with this divide
   y = minTop - faceY - h / 4
 
