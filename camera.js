@@ -29,11 +29,13 @@
 
   function toggleCamera() {
     if ($("camButton").classList.contains("camButtonOn")) {
+      // Turn camera on
       turnCamOn();
       $("captureButton").disabled = false;
       $("camButton").innerText = "Turn Webcam Off";
       $("scrollButton").disabled = false;
     } else {
+      // Turn camera off
       $("webcam").srcObject.getTracks()[0].stop();
       $("captureButton").disabled = true;
       $("camButton").innerText = "Turn Webcam On";
@@ -137,11 +139,13 @@
   function processStreamOfImages(canvas, ctx) {
     let scrollBtn = $("scrollButton");
     if (timer != null) {
+      // if timer already set, disable and turn off scrolling
       clearInterval(timer);
       timer = null;
       isSendingLive = false;
       scrollBtn.innerText = "Click to Scroll";
     } else {
+      // if no timer, enable scrolling and constantly send images to model in intervals
       scrollBtn.innerText = "Stop Scrolling";
       timer = setInterval(function() {
         if (!isSendingLive) {

@@ -53,20 +53,7 @@ workers = 16
 epochs = 25
 batch_size = torch.cuda.device_count()*100 # Change if out of cuda memory
 
-base_lr = 0.0001
-momentum = 0.9
-weight_decay = 1e-4
-print_freq = 10
-prec1 = 0
-best_prec1 = 1e20
-lr = base_lr
-
-count_test = 0
-count = 0
-
 def runModel(output_path):
-    global args, best_prec1, weight_decay, momentum
-
     model = ITrackerModel()
     model = torch.nn.DataParallel(model)
     model.cuda()
@@ -74,7 +61,6 @@ def runModel(output_path):
     imSize=(224,224)
     cudnn.benchmark = True
 
-    epoch = 0
     saved = load_checkpoint()
     if saved:
         print('Loading checkpoint for epoch %05d with loss %.5f (which is the mean squared error not the actual linear error)...' % (saved['epoch'], saved['best_prec1']))
@@ -83,8 +69,6 @@ def runModel(output_path):
             model.module.load_state_dict(state)
         except:
             model.load_state_dict(state)
-        epoch = saved['epoch']
-        best_prec1 = saved['best_prec1']
     else:
         print('Warning: Could not read checkpoint!')
 
@@ -94,27 +78,21 @@ def runModel(output_path):
         batch_size=batch_size, shuffle=False,
         num_workers=workers, pin_memory=True)
 
-    criterion = nn.MSELoss().cuda()
-
     # Quick test
-    return validate(val_loader, model, criterion, epoch)
+    return validate(val_loader, model)
 
-def validate(val_loader, model, criterion, epoch):
-
+def validate(val_loader, model):
     for i, (row, imFace, imEyeL, imEyeR, faceGrid, gaze) in enumerate(val_loader):
         # measure data loading time
         imFace = imFace.cuda(non_blocking=True)
         imEyeL = imEyeL.cuda(non_blocking=True)
         imEyeR = imEyeR.cuda(non_blocking=True)
         faceGrid = faceGrid.cuda(non_blocking=True)
-        gaze = gaze.cuda(non_blocking=True)
 
         imFace = torch.autograd.Variable(imFace, requires_grad = False)
         imEyeL = torch.autograd.Variable(imEyeL, requires_grad = False)
         imEyeR = torch.autograd.Variable(imEyeR, requires_grad = False)
         faceGrid = torch.autograd.Variable(faceGrid, requires_grad = False)
-
-        gaze = torch.autograd.Variable(gaze, requires_grad = False)
 
         # compute output
         with torch.no_grad():

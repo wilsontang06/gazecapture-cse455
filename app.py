@@ -55,11 +55,6 @@ def run_model():
   if not detected_faces:
     raise Exception('No face detected from image')
 
-  # TODO: to account for multiple images coming
-  # need to loop around whole code for calling azure
-  # need to call face api for each image, jsons will be top of loop
-  # CHOOSE: send one image to model at a time, or multiple (groups of 5 or 10)
-  #         Depends on how long the model takes
   face = detected_faces[0]
 
   # Save face dimensions in face rectangle and face landmarks
@@ -141,6 +136,7 @@ def run_model():
   return str(screen_x_cm) + " " + str(screen_y_cm)
 
 def addFaceValues(json, face, isFace, isLeftEye):
+  # send corresponding data to calculate x, y, w, and h
   face_rect = face.face_rectangle
   if isFace:
     x, y, w, h = face_rect.left, face_rect.top, \
@@ -164,6 +160,8 @@ def computeEyeData(outer, inner, top, bottom, faceX, faceY):
   minLeft = min(outer.x, min(inner.x, top.x))
   minTop = min(outer.y, min(inner.y, top.y))
   maxTop = max(outer.y, max(inner.y, top.y))
+
+  # eye crop is displayed as a square (consider different sizes depending on how zoomed in)
   w = abs(inner.x - outer.x) * 2.5
   h = w
   x = minLeft - faceX -  w / 4
