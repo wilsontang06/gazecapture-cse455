@@ -13,7 +13,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 
 from ITrackerData import ITrackerData
-from models.ITrackerModelOriginal import ITrackerModel
+from models.ITrackerModelSuperReduced import ITrackerModel
 
 '''
 Train/test code for iTracker.
@@ -62,7 +62,7 @@ doTest = args.sink # Only run test, no training
 prod = args.prod # Don't compute any loss. Used for running in production.
 
 workers = 16
-epochs = 25
+epochs = 5
 batch_size = torch.cuda.device_count()*100 # Change if out of cuda memory
 
 base_lr = 0.0001
@@ -85,7 +85,7 @@ def main():
     model = torch.nn.DataParallel(model)
     model.cuda()
 
-    imSize=(224,224)
+    imSize=(20,20)
     cudnn.benchmark = True
 
     epoch = 0
@@ -137,11 +137,12 @@ def main():
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch)
+        l2train = train(train_loader, model, criterion, optimizer, epoch)
+        print('Train avg loss at epoch ' + str(epoch) + ': ' + str(l2train))
 
         # evaluate on validation set
         prec1 = validate(val_loader, model, criterion, epoch)
-        print('Val avg loss: %f\n' % prec1)
+        print('Val avg loss at epoch ' + str(epoch) + ': ' + str(prec1))
     
         # remember best prec@1 and save checkpoint
         is_best = prec1 < best_prec1
@@ -158,6 +159,7 @@ def train(train_loader, model, criterion,optimizer, epoch):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
+    lossesLin = AverageMeter()
 
     # switch to train mode
     model.train()
@@ -187,6 +189,13 @@ def train(train_loader, model, criterion,optimizer, epoch):
 
         losses.update(loss.data.item(), imFace.size(0))
 
+        # record l2 loss
+        lossLin = output - gaze
+        lossLin = torch.mul(lossLin,lossLin)
+        lossLin = torch.sum(lossLin,1)
+        lossLin = torch.mean(torch.sqrt(lossLin))
+        lossesLin.update(lossLin.item(), imFace.size(0))
+
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
@@ -204,6 +213,8 @@ def train(train_loader, model, criterion,optimizer, epoch):
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses))
+
+        return lossesLin.avg
 
 def validate(val_loader, model, criterion, epoch):
     global count_test
