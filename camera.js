@@ -18,8 +18,6 @@
     let ctx = canvas.getContext("2d");
 
     turnCamOn();
-    // TODO: fill site with junk or random photos (so we can scroll the page)
-    // TODO: also add instructions/descriptions for the buttons
     $("camButton").addEventListener("click", toggleCamera);
     $("captureButton").addEventListener("click", function() {
       processImage(canvas, ctx);
@@ -108,14 +106,14 @@
     document.body.appendChild(circle);
 
     // Scroll using these coordinates
-    scrollFromY(y);
+    if (isSendingLive) {
+      scrollFromY(y);
+    }
   }
 
   /*
-
     Scrolls the page based on a given y coordinate.
     Thresholds for scrolling are commented in the function body.
-
   */
   function scrollFromY(y) {
     // The proportion of the top and bottom of the page that are considered scroll areas
@@ -150,9 +148,6 @@
           processImage(canvas, ctx);
           isSendingLive = true;
         }
-        // TODO: also implementing scroll feature
-        // Scrolling ideas: define top and bottom y coordinate for where scrolling should start
-        // need to proportion based on screen size
       }, 1000);
     }
   }
