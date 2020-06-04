@@ -139,7 +139,7 @@ def run_model():
   os.remove(tempImagePath)
 
   # for now, send back the (x, y) they're looking on the screen in cm
-  return (screen_x_cm, screen_y_cm)
+  return str(screen_x_cm) + " " + str(screen_y_cm)
 
 def addFaceValues(json, face, isFace, isLeftEye):
   face_rect = face.face_rectangle
