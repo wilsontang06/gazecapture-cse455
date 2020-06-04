@@ -20,6 +20,13 @@ DATASET_OUTPUT_PATH = "data_processed"
 SUBJECT_DATA_PATH = DATASET_PATH + "/00000"
 IMAGE_FILE = "00000.jpg"
 
+# Measurements of the device that will be taking the photos
+# Currently these are values for the iPhone 6s from https://github.com/CSAILVision/GazeCapture/blob/master/code/apple_device_data.csv
+deviceCameraToScreenXMm = 18.61
+deviceCameraToScreenyMm = 8.04
+deviceScreenWidthMm = 58.49
+deviceScreenHeightMm = 104.05
+
 app = Flask(__name__)
 CORS(app)
 
@@ -117,8 +124,19 @@ def run_model():
   out, err = process.communicate()
 
   # save coordinates (will likely need to change to properly extract the output from the model)
-  #coords = output.stdout
+  # coordinates are distance from camera in cm
   print("output", out, err)
+  cam_x_cm, cam_y_cm = (1.5, 0.5) # TODO: change this to extract the real output from main.py
+
+  # convert the camera coordinates to screen coordinates in cm
+  #
+  # orientation:
+  #   1 = portrait
+  #   2 = portrait upside down
+  #   3 = landscape w/ home button on the right
+  #   4 = landscape w/ home button on the left
+  orientation = 1
+  screen_x_cm, screen_y_cm = cam2screen(cam_x_cm, cam_y_cm, orientation)
 
   # debug (delete after)
   coords = json.dumps(appleFace) + "\n\n" + json.dumps(appleLeftEye) + "\n\n" + json.dumps(appleRightEye)
@@ -127,7 +145,8 @@ def run_model():
   os.remove(tempImagePath)
 
   ## (can change if want to send both (x,y) or just y coord)
-  return coords
+  # for now, send back the (x, y) they're looking on the screen in cm
+  return screen_x_cm, screen_y_cm
 
 def addFaceValues(json, face, isFace, isLeftEye):
   face_rect = face.face_rectangle
@@ -179,3 +198,43 @@ def faceGridFromFaceRect(frameW, frameH, gridW, gridH, labelFaceX, labelFaceY, l
     labelFaceGrid[i][3] = np.round(labelFaceH[i] * scaleY)
 
   return labelFaceGrid.astype(int).tolist()
+
+# (useCm = 1, single coordinate, single device) translation of cam2screen.m into Python
+# https://github.com/CSAILVision/GazeCapture/blob/master/code/cam2screen.m
+def cam2screen(xCam, yCam, orientation):
+  xScreen = float("nan")
+  yScreen = float("nan")
+
+  # Convert input to mm to be compatible with apple_device_data.csv
+  xCam *= 10
+  yCam *= 10
+
+  # Process device
+  xCurr = xCam
+  yCurr = yCam
+
+  # Transform so that measurements are relative to the device's origin
+  # (depending on its orientation).
+  dX = deviceCameraToScreenXMm
+  dY = deviceCameraToScreenyMm
+  dW = deviceScreenWidthMm
+  dH = deviceScreenHeightMm
+
+  if orientation == 1:
+    xCurr += dX
+    yCurr = -yCurr - dY
+  elif orientation == 2:
+    xCurr = xCurr - dX + dW
+    yCurr = -yCurr + dY + dH
+  elif orientation == 3:
+    xCurr -= dY
+    yCurr = -yCurr - dX + dW
+  elif orientation == 4:
+    xCurr += dY + dH
+    yCurr = -yCurr + dX
+
+  # Convert from mm to cm
+  xScreen /= 10
+  yScreen /= 10
+
+  return xScreen, yScreen
