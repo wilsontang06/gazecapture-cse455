@@ -84,7 +84,6 @@ def run_model():
   with open(rightEyePath, 'w') as outfile:
     json.dump(appleRightEye, outfile)
 
-
   # run facegrid matlab script to get facegrid json
   frameW, frameH = Image.open(tempImagePath).size
   gridW = 25
@@ -165,10 +164,9 @@ def computeEyeData(outer, inner, top, bottom, faceX, faceY):
   minLeft = min(outer.x, min(inner.x, top.x))
   minTop = min(outer.y, min(inner.y, top.y))
   maxTop = max(outer.y, max(inner.y, top.y))
-  w = abs(inner.x - outer.x) * 3
-  #h = abs(maxTop - minTop) * 2 # likely need to make the eye crop a square
+  w = abs(inner.x - outer.x) * 2.5
   h = w
-  x = minLeft - faceX -  w / 4 # play with this divide
+  x = minLeft - faceX -  w / 4
   y = minTop - faceY - h / 4
 
   return x, y, w, h

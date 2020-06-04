@@ -4,6 +4,7 @@
   const WIDTH = 500;
   const HEIGHT = 375;
   const HOST = "http://gazecapture455.westus2.cloudapp.azure.com:5000/model"
+  const PX_IN_CM = 37.795275591;
 
   let timer;
 
@@ -59,7 +60,7 @@
   }
 
   function pxToMm(px) {
-    const cm = px / 37.795275591; // https://stackoverflow.com/questions/50829074/how-to-convert-pixels-to-cm-in-javascript#:~:text=It%20is%20used%20in%20most%20browsers.&text=If%20you%20just%20want%20to,conversion%20of%20px%20to%20cm.
+    const cm = px / PX_IN_CM; // https://stackoverflow.com/questions/50829074/how-to-convert-pixels-to-cm-in-javascript#:~:text=It%20is%20used%20in%20most%20browsers.&text=If%20you%20just%20want%20to,conversion%20of%20px%20to%20cm.
     return cm * 10;
   }
 
@@ -83,8 +84,26 @@
   }
 
   function processCoordinates(response) {
-    // TODO: change to display coords (dot on screen at the position)
-    $("debug").innerText = response
+    let coords = response.split(" ");
+
+    // keep coordinates in bounds of window
+    let x = max(50, min(window.innerWidth, coords[0] * PX_IN_CM));
+    let y = max(50, min(widow.innerHeight, coords[1] * PX_IN_CM));
+    console.log(x + " " + y);
+
+    // create the dot to display on screen
+    let circle = document.createElement("div");
+    circle.id = "circle";
+    circle.style.left = x + "px";
+    circle.style.top = y + "px";
+
+    // delete old circle
+    let oldCircle = $("circle")
+    if (oldCircle) {
+      oldCircle.remove();
+    }
+
+    document.body.appendChild(circle);
   }
 
   function processStreamOfImages(canvas, ctx) {
