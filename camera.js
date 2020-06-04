@@ -7,6 +7,7 @@
   const PX_IN_CM = 37.795275591;
 
   let timer;
+  let isSendingLive = false;
 
   window.addEventListener("load", init);
 
@@ -84,11 +85,12 @@
   }
 
   function processCoordinates(response) {
+    isSendingLive = false;
     let coords = response.split(" ");
 
     // keep coordinates in bounds of window
-    let x = max(50, min(window.innerWidth, coords[0] * PX_IN_CM));
-    let y = max(50, min(widow.innerHeight, coords[1] * PX_IN_CM));
+    let x = Math.max(50, Math.min(window.innerWidth, coords[0] * PX_IN_CM));
+    let y = Math.max(50, Math.min(window.innerHeight, coords[1] * PX_IN_CM));
     console.log(x + " " + y);
 
     // create the dot to display on screen
@@ -111,14 +113,18 @@
     if (timer != null) {
       clearInterval(timer);
       timer = null;
+      isSendingLive = false;
       scrollBtn.innerText = "Click to Scroll";
     } else {
       scrollBtn.innerText = "Stop Scrolling";
       timer = setInterval(function() {
+        if (!isSendingLive) {
           processImage(canvas, ctx);
-          // TODO: also implementing scroll feature
-          // Scrolling ideas: define top and bottom y coordinate for where scrolling should start
-          // need to proportion based on screen size
+          isSendingLive = true;
+        }
+        // TODO: also implementing scroll feature
+        // Scrolling ideas: define top and bottom y coordinate for where scrolling should start
+        // need to proportion based on screen size
       }, 1000);
     }
   }
