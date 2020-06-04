@@ -120,11 +120,10 @@ def run_model():
   prepareInput(DATASET_PATH, DATASET_OUTPUT_PATH)
 
   # run model with new cropped images
-  tensor = runModel(DATASET_OUTPUT_PATH)
-  print(tensor)
+  tensor = runModel(DATASET_OUTPUT_PATH)[0]
 
   # coordinates are distance from camera in cm
-  cam_x_cm, cam_y_cm = (1.5, 0.5) # TODO: change this to extract the real output from main.py
+  cam_x_cm, cam_y_cm = (tensor[0].item(), tensor[1].item())
 
   # convert the camera coordinates to screen coordinates in cm
   #
@@ -136,15 +135,11 @@ def run_model():
   orientation = 1
   screen_x_cm, screen_y_cm = cam2screen(cam_x_cm, cam_y_cm, orientation)
 
-  # debug (delete after)
-  coords = json.dumps(appleFace) + "\n\n" + json.dumps(appleLeftEye) + "\n\n" + json.dumps(appleRightEye)
-
   # delete temp file
   os.remove(tempImagePath)
 
-  ## (can change if want to send both (x,y) or just y coord)
   # for now, send back the (x, y) they're looking on the screen in cm
-  return screen_x_cm, screen_y_cm
+  return (screen_x_cm, screen_y_cm)
 
 def addFaceValues(json, face, isFace, isLeftEye):
   face_rect = face.face_rectangle
