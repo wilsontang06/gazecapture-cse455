@@ -106,7 +106,35 @@
     }
 
     document.body.appendChild(circle);
+
+    // Scroll using these coordinates
+    scrollFromY(y);
   }
+
+  /*
+
+    Scrolls the page based on a given y coordinate.
+    Thresholds for scrolling are commented in the function body.
+
+  */
+  function scrollFromY(y) {
+    // The proportion of the top and bottom of the page that are considered scroll areas
+    // i.e. if the pct = 0.2, then the page will scroll when y is in the top 20% or bottom 20% of the page height
+    const edgeHeightPct = 0.2;
+
+    // How many px to scroll
+    const scrollAmount = 200;
+
+    // Scroll based on the region
+    if(y <= window.innerHeight * edgeHeightPct) {
+      // Top scroll region
+      scrollBy(0, -scrollAmount);
+    } else if(y >= window.innerHeight * (1 - edgeHeightPct)) {
+      // Bottom scroll region
+      scrollBy(0, scrollAmount);
+    }
+  }
+  window.s = scrollFromY;
 
   function processStreamOfImages(canvas, ctx) {
     let scrollBtn = $("scrollButton");
