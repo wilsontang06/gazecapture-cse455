@@ -203,19 +203,9 @@ def prepareInput(dataset_path, output_path):
     sio.savemat(metaFile, meta)
 
     # Statistics
-    nMissing = np.sum(rToM < 0)
-    nExtra = np.sum(mToR < 0)
     totalMatch = len(mKey) == len(rKey) and np.all(np.equal(mKey, rKey))
     print('======================\n\tSummary\n======================')
     print('Total added %d frames from %d recordings.' % (len(meta['frameIndex']), len(np.unique(meta['labelRecNum']))))
-    if nMissing > 0:
-        print('There are %d frames missing in the new dataset. This may affect the results. Check the log to see which files are missing.' % nMissing)
-    else:
-        print('There are no missing files.')
-    if nExtra > 0:
-        print('There are %d extra frames in the new dataset. This is generally ok as they were marked for validation split only.' % nExtra)
-    else:
-        print('There are no extra files that were not in the reference dataset.')
     if totalMatch:
         print('The new metadata.mat is an exact match to the reference from GitHub (including ordering)')
 

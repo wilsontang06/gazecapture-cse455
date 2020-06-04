@@ -36,8 +36,6 @@ MEAN_PATH = './'
 def loadMetadata(filename, silent = False):
     try:
         # http://stackoverflow.com/questions/6273634/access-array-contents-from-a-mat-file-loaded-using-scipy-io-loadmat-python
-        if not silent:
-            print('\tReading metadata from %s...' % filename)
         metadata = sio.loadmat(filename, squeeze_me=True, struct_as_record=False)
     except:
         print('\tFailed to read the meta file "%s"!' % filename)
@@ -68,7 +66,6 @@ class ITrackerData(data.Dataset):
         self.imSize = imSize
         self.gridSize = gridSize
 
-        print('Loading iTracker dataset...')
         metaFile = os.path.join(dataPath, 'metadata.mat')
         #metaFile = 'metadata.mat'
         if metaFile is None or not os.path.isfile(metaFile):

@@ -20,7 +20,7 @@
     turnCamOn();
     $("camButton").addEventListener("click", toggleCamera);
     $("captureButton").addEventListener("click", function() {
-      processImage(canvas, ctx);
+      processImage(canvas, ctx, false);
     });
     $("scrollButton").addEventListener("click", function() {
       processStreamOfImages(canvas, ctx);
@@ -65,7 +65,7 @@
     return cm * 10;
   }
 
-  function processImage(canvas, ctx) {
+  function processImage(canvas, ctx, scroll) {
     // capture the current image from the webcam
     let img = document.getElementById("webcam");
     ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
@@ -80,18 +80,18 @@
     fetch(HOST, {method: "POST", body: params})
       .then(checkStatus)
       .then(resp => resp.text())
-      .then(processCoordinates)
-      .catch(console.log);
+      .then(resp => processCoordinates(resp, scroll))
+      .catch(errorResponse);
   }
 
-  function processCoordinates(response) {
+  function processCoordinates(response, scroll) {
     isSendingLive = false;
     let coords = response.split(" ");
 
     // keep coordinates in bounds of window
-    let x = Math.max(50, Math.min(window.innerWidth, coords[0] * PX_IN_CM));
-    let y = Math.max(50, Math.min(window.innerHeight, coords[1] * PX_IN_CM));
-    console.log(x + " " + y);
+    let x = Math.max(50, Math.min(window.innerWidth - 75, coords[0] * PX_IN_CM * 1.5));
+    let y = Math.max(50, Math.min(window.innerHeight - 75, coords[1] * PX_IN_CM * 1.75));
+    console.log("x:" + x + " y:" + y);
 
     // create the dot to display on screen
     let circle = document.createElement("div");
@@ -108,7 +108,7 @@
     document.body.appendChild(circle);
 
     // Scroll using these coordinates
-    if (isSendingLive) {
+    if (scroll) {
       scrollFromY(y);
     }
   }
@@ -120,7 +120,7 @@
   function scrollFromY(y) {
     // The proportion of the top and bottom of the page that are considered scroll areas
     // i.e. if the pct = 0.2, then the page will scroll when y is in the top 20% or bottom 20% of the page height
-    const edgeHeightPct = 0.2;
+    const edgeHeightPct = 0.25;
 
     // How many px to scroll
     const scrollAmount = 200;
@@ -149,11 +149,16 @@
       scrollBtn.innerText = "Stop Scrolling";
       timer = setInterval(function() {
         if (!isSendingLive) {
-          processImage(canvas, ctx);
+          processImage(canvas, ctx, true);
           isSendingLive = true;
         }
       }, 1000);
     }
+  }
+
+  function errorResponse(err) {
+    isSendingLive = false;
+    console.log(err);
   }
 
   function checkStatus(response) {
