@@ -10,6 +10,7 @@ import os
 import subprocess
 import numpy as np
 from .prepareInput import prepareInput
+from .mainProcessImage import runModel
 from shutil import copytree, rmtree
 
 KEY = 'd09e05217d2e40b98e07f105b90de804'
@@ -118,14 +119,11 @@ def run_model():
   # run prepareDataset to generate cropped images
   prepareInput(DATASET_PATH, DATASET_OUTPUT_PATH)
 
-  # run model with file
-  process = subprocess.Popen(["python3", "main.py",
-                          "--data_path", DATASET_OUTPUT_PATH, "--sink", "--prod"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  out, err = process.communicate()
+  # run model with new cropped images
+  tensor = runModel(DATASET_OUTPUT_PATH)
+  print(tensor)
 
-  # save coordinates (will likely need to change to properly extract the output from the model)
   # coordinates are distance from camera in cm
-  print("output", out, err)
   cam_x_cm, cam_y_cm = (1.5, 0.5) # TODO: change this to extract the real output from main.py
 
   # convert the camera coordinates to screen coordinates in cm
