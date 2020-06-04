@@ -58,6 +58,11 @@
     }
   }
 
+  function pxToMm(px) {
+    const cm = px / 37.795275591; // https://stackoverflow.com/questions/50829074/how-to-convert-pixels-to-cm-in-javascript#:~:text=It%20is%20used%20in%20most%20browsers.&text=If%20you%20just%20want%20to,conversion%20of%20px%20to%20cm.
+    return cm * 10;
+  }
+
   function processImage(canvas, ctx) {
     // capture the current image from the webcam
     let img = document.getElementById("webcam");
@@ -66,6 +71,8 @@
 
     let params = new FormData();
     params.append("image", jpegFile);
+    params.append("screenWidthMm", pxToMm(window.innerWidth));
+    params.append("screenHeightMm", pxToMm(window.innerHeight));
 
     // sends the image to the backend to be evaluated with the model
     fetch(HOST, {method: "POST", body: params})

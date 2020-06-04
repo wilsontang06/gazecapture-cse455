@@ -25,8 +25,6 @@ IMAGE_FILE = "00000.jpg"
 # Currently these are values for the iPhone 6s from https://github.com/CSAILVision/GazeCapture/blob/master/code/apple_device_data.csv
 deviceCameraToScreenXMm = 18.61
 deviceCameraToScreenyMm = 8.04
-deviceScreenWidthMm = 58.49
-deviceScreenHeightMm = 104.05
 
 app = Flask(__name__)
 CORS(app)
@@ -34,6 +32,8 @@ CORS(app)
 @app.route('/model', methods=['POST'])
 def run_model():
   imageData = request.form["image"]
+  screenWidthMm = request.form["screenWidthMm"]
+  screenHeightMm = request.form["screenHeightMm"]
 
   # save image into temp file to pass stream to face api
   tempImagePath = os.path.join(SUBJECT_DATA_PATH + "/frames", IMAGE_FILE)
@@ -133,7 +133,7 @@ def run_model():
   #   3 = landscape w/ home button on the right
   #   4 = landscape w/ home button on the left
   orientation = 1
-  screen_x_cm, screen_y_cm = cam2screen(cam_x_cm, cam_y_cm, orientation)
+  screen_x_cm, screen_y_cm = cam2screen(cam_x_cm, cam_y_cm, orientation, screenWidthMm, screenHeightMm)
 
   # delete temp file
   os.remove(tempImagePath)
@@ -195,7 +195,7 @@ def faceGridFromFaceRect(frameW, frameH, gridW, gridH, labelFaceX, labelFaceY, l
 
 # (useCm = 1, single coordinate, single device) translation of cam2screen.m into Python
 # https://github.com/CSAILVision/GazeCapture/blob/master/code/cam2screen.m
-def cam2screen(xCam, yCam, orientation):
+def cam2screen(xCam, yCam, orientation, deviceScreenWidthMm, deviceScreenHeightMm):
   # Convert input to mm to be compatible with apple_device_data.csv
   xCam *= 10
   yCam *= 10
