@@ -196,9 +196,6 @@ def faceGridFromFaceRect(frameW, frameH, gridW, gridH, labelFaceX, labelFaceY, l
 # (useCm = 1, single coordinate, single device) translation of cam2screen.m into Python
 # https://github.com/CSAILVision/GazeCapture/blob/master/code/cam2screen.m
 def cam2screen(xCam, yCam, orientation):
-  xScreen = float("nan")
-  yScreen = float("nan")
-
   # Convert input to mm to be compatible with apple_device_data.csv
   xCam *= 10
   yCam *= 10
@@ -228,7 +225,7 @@ def cam2screen(xCam, yCam, orientation):
     yCurr = -yCurr + dX
 
   # Convert from mm to cm
-  xScreen /= 10
-  yScreen /= 10
+  xCurr /= 10
+  yCurr /= 10
 
-  return xScreen, yScreen
+  return xCurr, yCurr
