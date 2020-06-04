@@ -75,19 +75,18 @@ def runModel(output_path):
     cudnn.benchmark = True
 
     epoch = 0
-    if doLoad:
-        saved = load_checkpoint()
-        if saved:
-            print('Loading checkpoint for epoch %05d with loss %.5f (which is the mean squared error not the actual linear error)...' % (saved['epoch'], saved['best_prec1']))
-            state = saved['state_dict']
-            try:
-                model.module.load_state_dict(state)
-            except:
-                model.load_state_dict(state)
-            epoch = saved['epoch']
-            best_prec1 = saved['best_prec1']
-        else:
-            print('Warning: Could not read checkpoint!')
+    saved = load_checkpoint()
+    if saved:
+        print('Loading checkpoint for epoch %05d with loss %.5f (which is the mean squared error not the actual linear error)...' % (saved['epoch'], saved['best_prec1']))
+        state = saved['state_dict']
+        try:
+            model.module.load_state_dict(state)
+        except:
+            model.load_state_dict(state)
+        epoch = saved['epoch']
+        best_prec1 = saved['best_prec1']
+    else:
+        print('Warning: Could not read checkpoint!')
 
     dataVal = ITrackerData(dataPath = output_path, split='test', imSize = imSize)
     val_loader = torch.utils.data.DataLoader(
@@ -127,7 +126,7 @@ def validate(val_loader, model, criterion, epoch):
 
 CHECKPOINTS_PATH = '/home/wtang06/gazecapture/gazecapture-cse455/checkpoints'
 
-def load_checkpoint(filename='checkpoint.pth.tar'):
+def load_checkpoint(filename='original.checkpoint.pth.tar'):
     filename = os.path.join(CHECKPOINTS_PATH, filename)
     print(filename)
     if not os.path.isfile(filename):
