@@ -1,8 +1,3 @@
-'''
-  - Remove LRN layers
-  - Use 1 FC layer for face image.
-  - Use 1 FC layer to join everything.
-'''
 import argparse
 import os
 import shutil
@@ -54,27 +49,11 @@ class ItrackerImageModel(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2),
             nn.Conv2d(96, 64, kernel_size=1, stride=1, padding=0),
             nn.ReLU(inplace=True),
-
         )
 
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
-        return x
-
-class FaceImageModel(nn.Module):
-
-    def __init__(self):
-        super(FaceImageModel, self).__init__()
-        self.conv = ItrackerImageModel()
-        self.fc = nn.Sequential(
-            nn.Linear(12*12*64, 64),
-            nn.ReLU(inplace=True),
-            )
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.fc(x)
         return x
 
 class FaceGridModel(nn.Module):
@@ -99,16 +78,15 @@ class ITrackerModel(nn.Module):
     def __init__(self):
         super(ITrackerModel, self).__init__()
         self.eyeModel = ItrackerImageModel()
-        self.faceModel = FaceImageModel()
         self.gridModel = FaceGridModel()
         # Joining both eyes
         self.eyesFC = nn.Sequential(
-            nn.Linear(2*12*12*64, 128),
+            nn.Linear(86528, 128),
             nn.ReLU(inplace=True),
             )
         # Joining everything
         self.fc = nn.Sequential(
-            nn.Linear(128+64+128, 2)
+            nn.Linear(128+128, 2),
             )
 
     def forward(self, faces, eyesLeft, eyesRight, faceGrids):
@@ -119,12 +97,10 @@ class ITrackerModel(nn.Module):
         xEyes = torch.cat((xEyeL, xEyeR), 1)
         xEyes = self.eyesFC(xEyes)
 
-        # Face net
-        xFace = self.faceModel(faces)
         xGrid = self.gridModel(faceGrids)
 
         # Cat all
-        x = torch.cat((xEyes, xFace, xGrid), 1)
+        x = torch.cat((xEyes, xGrid), 1)
         x = self.fc(x)
 
         return x
