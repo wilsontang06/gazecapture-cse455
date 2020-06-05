@@ -13,7 +13,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 
 from ITrackerData import ITrackerData
-from models.ITrackerModelSuperReduced import ITrackerModel
+from models.ITrackerModelOriginal import ITrackerModel
 
 '''
 Train/test code for iTracker.
@@ -214,7 +214,7 @@ def train(train_loader, model, criterion,optimizer, epoch):
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses))
 
-        return lossesLin.avg
+    return lossesLin.avg
 
 def validate(val_loader, model, criterion, epoch):
     global count_test
