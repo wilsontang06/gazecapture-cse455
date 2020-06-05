@@ -13,7 +13,7 @@ from .prepareInput import prepareInput
 from .mainProcessImage import runModel
 from shutil import copytree, rmtree
 
-KEY = 'd09e05217d2e40b98e07f105b90de804'
+KEY = '4b2fc2165e2049c0a86cd203df807fd3'
 ENDPOINT = 'https://westcentralus.api.cognitive.microsoft.com/'
 
 DATASET_PATH = "data"
