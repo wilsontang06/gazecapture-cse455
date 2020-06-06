@@ -85,7 +85,7 @@ def main():
     model = torch.nn.DataParallel(model)
     model.cuda()
 
-    imSize=(20,20)
+    imSize=(224,224)
     cudnn.benchmark = True
 
     epoch = 0
@@ -214,7 +214,7 @@ def train(train_loader, model, criterion,optimizer, epoch):
                    epoch, i, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses))
 
-        return lossesLin.avg
+    return lossesLin.avg
 
 def validate(val_loader, model, criterion, epoch):
     global count_test
@@ -276,7 +276,7 @@ def validate(val_loader, model, criterion, epoch):
 
     return lossesLin.avg
 
-CHECKPOINTS_PATH = '/home/wtang06/gazecapture/gazecapture-cse455/checkpoints'
+CHECKPOINTS_PATH = './checkpoints'
 
 def load_checkpoint(filename='checkpoint.pth.tar'):
     filename = os.path.join(CHECKPOINTS_PATH, filename)
