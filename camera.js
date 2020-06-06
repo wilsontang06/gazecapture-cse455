@@ -90,7 +90,7 @@
 
     // keep coordinates in bounds of window
     let x = Math.max(50, Math.min(window.innerWidth - 75, coords[0] * PX_IN_CM * 1.5));
-    let y = Math.max(50, Math.min(window.innerHeight - 75, coords[1] * PX_IN_CM * 1.75));
+    let y = Math.max(50, Math.min(window.innerHeight - 75, coords[1] * PX_IN_CM * 2.5));
     console.log("x:" + x + " y:" + y);
 
     // create the dot to display on screen
@@ -120,7 +120,7 @@
   function scrollFromY(y) {
     // The proportion of the top and bottom of the page that are considered scroll areas
     // i.e. if the pct = 0.2, then the page will scroll when y is in the top 20% or bottom 20% of the page height
-    const edgeHeightPct = 0.25;
+    const edgeHeightPct = 0.3;
 
     // How many px to scroll
     const scrollAmount = 200;
