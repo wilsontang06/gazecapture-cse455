@@ -58,7 +58,7 @@ def runModel(output_path):
     model = torch.nn.DataParallel(model)
     model.cuda()
 
-    imSize=(224,224)
+    imSize=(20,20)
     cudnn.benchmark = True
 
     saved = load_checkpoint()

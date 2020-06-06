@@ -81,19 +81,18 @@ class ITrackerData(data.Dataset):
         self.transformFace = transforms.Compose([
             transforms.Resize(self.imSize),
             transforms.ToTensor(),
-            SubtractMean(meanImg=self.faceMean),
+            #SubtractMean(meanImg=self.faceMean),
         ])
         self.transformEyeL = transforms.Compose([
             transforms.Resize(self.imSize),
             transforms.ToTensor(),
-            SubtractMean(meanImg=self.eyeLeftMean),
+            #SubtractMean(meanImg=self.eyeLeftMean),
         ])
         self.transformEyeR = transforms.Compose([
             transforms.Resize(self.imSize),
             transforms.ToTensor(),
-            SubtractMean(meanImg=self.eyeRightMean),
+            #SubtractMean(meanImg=self.eyeRightMean),
         ])
-
 
         if split == 'test':
             mask = self.metadata['labelTest']
