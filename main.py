@@ -13,7 +13,7 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 
 from ITrackerData import ITrackerData
-from models.ITrackerModelSuperReduced import ITrackerModel
+from models.ITrackerModelNoFace import ITrackerModel
 
 '''
 Train/test code for iTracker.
@@ -278,7 +278,7 @@ def validate(val_loader, model, criterion, epoch):
 
 CHECKPOINTS_PATH = './checkpoints'
 
-def load_checkpoint(filename='checkpoint.pth.tar'):
+def load_checkpoint(filename='models.ITrackerModelNoFace-ekh1MreHlJ.pth.tar'):
     filename = os.path.join(CHECKPOINTS_PATH, filename)
     print(filename)
     if not os.path.isfile(filename):
@@ -286,7 +286,7 @@ def load_checkpoint(filename='checkpoint.pth.tar'):
     state = torch.load(filename)
     return state
 
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best, filename='models.ITrackerModelNoFace-ekh1MreHlJ.pth.tar'):
     if not os.path.isdir(CHECKPOINTS_PATH):
         os.makedirs(CHECKPOINTS_PATH, 0o777)
     bestFilename = os.path.join(CHECKPOINTS_PATH, 'best_' + filename)
