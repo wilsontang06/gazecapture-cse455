@@ -3,3 +3,4 @@
 data/**/*.json
 data_processed/**/*.json
 models/__pycache__/
+__pycache__/
