@@ -2,3 +2,4 @@
 *.jpg
 data/**/*.json
 data_processed/**/*.json
+models/__pycache__/
